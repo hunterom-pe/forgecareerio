@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Tier {
+  SEEKER
+  ELITE
+  PROFESSIONAL
+}
+
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  jobTitle      String?
+  location      String?
+  resumePath    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  tier          Tier      @default(SEEKER)
+  optimizationCount Int   @default(0)
+  briefCount        Int   @default(0)
+  scanCount         Int   @default(0)
+  lastResetDate     DateTime @default(now())
+
+
+  accounts      Account[]
+  jobs          Job[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  title       String
+  company     String
+  location    String
+  description String
+  matchScore  Int
+  status      String   @default("WISHLIST")
+  applyLink   String?
+  isSaved     Boolean  @default(false)
+  isDeleted   Boolean  @default(false)
+  userId      String
+  rejectionReason String?
+  rejectionNotes  String?
+  optimizedSummary String? @db.Text
+  optimizedBullets Json?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SearchCache {
+  id        String   @id @default(cuid())
+  query     String
+  location  String
+  results   Json
+  createdAt DateTime @default(now())
+
+  @@unique([query, location])
+  @@index([query, location])
+}
+

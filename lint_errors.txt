@@ -1,0 +1,74 @@
+
+/Users/hunter/.gemini/antigravity/scratch/huntr-v2/src/app/dashboard/page.tsx
+   58:5  error  Error: Cannot access variable before it is declared
+
+`setCurrentPage` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/hunter/.gemini/antigravity/scratch/huntr-v2/src/app/dashboard/page.tsx:58:5
+  56 |   const startScan = async (page = 0) => {
+  57 |     setIsScanning(true);
+> 58 |     setCurrentPage(page);
+     |     ^^^^^^^^^^^^^^ `setCurrentPage` accessed before it is declared
+  59 |     try {
+  60 |       const response = await fetch("/api/jobs/search", {
+  61 |         method: "POST",
+
+/Users/hunter/.gemini/antigravity/scratch/huntr-v2/src/app/dashboard/page.tsx:119:23
+  117 |
+  118 |   const jobsPerPage = 8;
+> 119 |   const [currentPage, setCurrentPage] = useState(0);
+      |                       ^^^^^^^^^^^^^^ `setCurrentPage` is declared here
+  120 |
+  121 |
+  122 |                                                                                                                                                                                                                                                                                                                                      react-hooks/immutability
+   87:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/hunter/.gemini/antigravity/scratch/huntr-v2/src/app/dashboard/page.tsx:87:5
+  85 |
+  86 |   useEffect(() => {
+> 87 |     setIsBrowser(true);
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  88 |   }, []);
+  89 |
+  90 |   // Fetch tracked jobs from DB on load                                                                                                                                                                                                            react-hooks/set-state-in-effect
+  111:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/hunter/.gemini/antigravity/scratch/huntr-v2/src/app/dashboard/page.tsx:111:7
+  109 |
+  110 |     if (typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
+> 111 |       startScan();
+      |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  112 |       // Remove query param from URL without reloading
+  113 |       window.history.replaceState({}, '', '/dashboard');
+  114 |     }                                   react-hooks/set-state-in-effect
+  125:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/hunter/.gemini/antigravity/scratch/huntr-v2/src/app/dashboard/page.tsx:125:7
+  123 |   useEffect(() => {
+  124 |     if (isBrowser && typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
+> 125 |       startScan();
+      |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  126 |       // Remove query param from URL without reloading
+  127 |       window.history.replaceState({}, '', '/dashboard');
+  128 |     }  react-hooks/set-state-in-effect
+
+✖ 4 problems (4 errors, 0 warnings)
+
