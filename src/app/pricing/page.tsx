@@ -10,6 +10,7 @@ export default function PricingPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [billingInterval, setBillingInterval] = useState<'month' | 'quarter' | 'year'>('month');
 
   const handleCheckout = async (plan: 'ELITE' | 'PROFESSIONAL') => {
     if (!session) {
@@ -22,7 +23,7 @@ export default function PricingPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, interval: billingInterval }),
       });
 
       const data = await res.json();
@@ -83,6 +84,49 @@ export default function PricingPage() {
 
       {/* Pricing Cards */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
+        
+        {/* Billing Interval Toggle */}
+        <div className="flex justify-center mb-16">
+          <div className="inline-flex p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl border border-slate-300/40 shadow-inner relative gap-1">
+            <button
+              onClick={() => setBillingInterval('month')}
+              className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 relative z-10 ${
+                billingInterval === 'month'
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-950'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingInterval('quarter')}
+              className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 relative z-10 ${
+                billingInterval === 'quarter'
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-950'
+              }`}
+            >
+              Quarterly
+              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm">
+                Save 20%
+              </span>
+            </button>
+            <button
+              onClick={() => setBillingInterval('year')}
+              className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 relative z-10 ${
+                billingInterval === 'year'
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-950'
+              }`}
+            >
+              Yearly
+              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm">
+                Save 33%
+              </span>
+            </button>
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-3 gap-8 items-center">
           
           {/* Seeker Tier */}
@@ -123,9 +167,25 @@ export default function PricingPage() {
               <h2 className="text-[13px] font-black uppercase tracking-widest text-blue-400">Elite</h2>
             </div>
             <div className="mb-6">
-              <span className="text-5xl font-black text-white">$15</span>
-              <span className="text-slate-400 font-medium"> / month</span>
-              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-2">Early Adopter Pricing</p>
+              <span className="text-5xl font-black text-white">
+                {billingInterval === 'month' ? '$15' : billingInterval === 'quarter' ? '$36' : '$119'}
+              </span>
+              <span className="text-slate-400 font-medium">
+                {billingInterval === 'month' ? ' / month' : billingInterval === 'quarter' ? ' / 3 months' : ' / year'}
+              </span>
+              {billingInterval !== 'month' && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+                    {billingInterval === 'quarter' ? 'effectively $12/mo' : 'effectively $9.90/mo'}
+                  </span>
+                  <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                    {billingInterval === 'quarter' ? 'Save $9' : 'Save $61'}
+                  </span>
+                </div>
+              )}
+              {billingInterval === 'month' && (
+                <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-2">Early Adopter Pricing</p>
+              )}
             </div>
             <p className="text-[14px] text-slate-300 font-medium mb-8 leading-relaxed">The standard for serious job seekers. Full AI intelligence suite.</p>
             <button 
@@ -161,9 +221,25 @@ export default function PricingPage() {
               <h2 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Professional</h2>
             </div>
             <div className="mb-6">
-              <span className="text-5xl font-black text-slate-900">$29</span>
-              <span className="text-slate-500 font-medium"> / month</span>
-              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-2">Early Adopter Pricing</p>
+              <span className="text-5xl font-black text-slate-900">
+                {billingInterval === 'month' ? '$29' : billingInterval === 'quarter' ? '$69' : '$229'}
+              </span>
+              <span className="text-slate-500 font-medium">
+                {billingInterval === 'month' ? ' / month' : billingInterval === 'quarter' ? ' / 3 months' : ' / year'}
+              </span>
+              {billingInterval !== 'month' && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
+                    {billingInterval === 'quarter' ? 'effectively $23/mo' : 'effectively $19.08/mo'}
+                  </span>
+                  <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                    {billingInterval === 'quarter' ? 'Save $18' : 'Save $119'}
+                  </span>
+                </div>
+              )}
+              {billingInterval === 'month' && (
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-2">Early Adopter Pricing</p>
+              )}
             </div>
 
             <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">For high-level pivots and multi-role career management.</p>

@@ -15,23 +15,43 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Payments are currently disabled. Please contact support." }, { status: 503 });
     }
 
-    const { plan } = await req.json();
+    const { plan, interval = 'month' } = await req.json();
 
     if (!plan || (plan !== 'ELITE' && plan !== 'PROFESSIONAL')) {
       return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
     }
 
+    if (interval !== 'month' && interval !== 'quarter' && interval !== 'year') {
+      return NextResponse.json({ error: "Invalid billing interval selected" }, { status: 400 });
+    }
+
     // Mapping plans to actual Price IDs from Stripe Dashboard
     const isTest = process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_');
     
-    const priceMap: Record<string, string> = isTest ? {
+    const priceMap: Record<string, Record<string, string>> = isTest ? {
       // TEST MODE PRICE IDs
-      'ELITE': 'price_1TUEIqLkFDyP0eAeZSWikqpR',
-      'PROFESSIONAL': 'price_1TUEJNLkFDyP0eAek5P6j2AM',
+      'ELITE': {
+        'month': process.env.STRIPE_ELITE_MONTHLY_PRICE_ID || 'price_1TUEIqLkFDyP0eAeZSWikqpR',
+        'quarter': process.env.STRIPE_ELITE_QUARTERLY_PRICE_ID || 'price_1TUEIqLkFDyP0eAeZSWikqpR_quarter',
+        'year': process.env.STRIPE_ELITE_YEARLY_PRICE_ID || 'price_1TUEIqLkFDyP0eAeZSWikqpR_year',
+      },
+      'PROFESSIONAL': {
+        'month': process.env.STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID || 'price_1TUEJNLkFDyP0eAek5P6j2AM',
+        'quarter': process.env.STRIPE_PROFESSIONAL_QUARTERLY_PRICE_ID || 'price_1TUEJNLkFDyP0eAek5P6j2AM_quarter',
+        'year': process.env.STRIPE_PROFESSIONAL_YEARLY_PRICE_ID || 'price_1TUEJNLkFDyP0eAek5P6j2AM_year',
+      }
     } : {
       // LIVE MODE PRICE IDs
-      'ELITE': 'price_1TUA0pLkFDyP0eAeJzpBV0ob',
-      'PROFESSIONAL': 'price_1TUA1GLkFDyP0eAeyylI7i6f',
+      'ELITE': {
+        'month': process.env.STRIPE_ELITE_MONTHLY_PRICE_ID || 'price_1TUA0pLkFDyP0eAeJzpBV0ob',
+        'quarter': process.env.STRIPE_ELITE_QUARTERLY_PRICE_ID || 'price_1TUA0pLkFDyP0eAeJzpBV0ob_quarter',
+        'year': process.env.STRIPE_ELITE_YEARLY_PRICE_ID || 'price_1TUA0pLkFDyP0eAeJzpBV0ob_year',
+      },
+      'PROFESSIONAL': {
+        'month': process.env.STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID || 'price_1TUA1GLkFDyP0eAeyylI7i6f',
+        'quarter': process.env.STRIPE_PROFESSIONAL_QUARTERLY_PRICE_ID || 'price_1TUA1GLkFDyP0eAeyylI7i6f_quarter',
+        'year': process.env.STRIPE_PROFESSIONAL_YEARLY_PRICE_ID || 'price_1TUA1GLkFDyP0eAeyylI7i6f_year',
+      }
     };
 
     // Determine the base URL for redirects. 
@@ -60,7 +80,7 @@ export async function POST(req: Request) {
       allow_promotion_codes: true,
       line_items: [
         {
-          price: priceMap[plan],
+          price: priceMap[plan][interval],
           quantity: 1,
         },
       ],
