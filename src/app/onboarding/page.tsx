@@ -15,6 +15,7 @@ export default function OnboardingPage() {
   const [targetRole, setTargetRole] = useState("");
   const [location, setLocation] = useState("");
   const [selectedTier, setSelectedTier] = useState<"SEEKER" | "ELITE" | "PROFESSIONAL">("SEEKER");
+  const [selectedInterval, setSelectedInterval] = useState<'month' | 'quarter' | 'year'>('month');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'warning' } | null>(null);
@@ -52,7 +53,7 @@ export default function OnboardingPage() {
           const checkoutRes = await fetch("/api/checkout", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ plan: selectedTier }),
+            body: JSON.stringify({ plan: selectedTier, interval: selectedInterval }),
           });
           
           const checkoutData = await checkoutRes.json();
@@ -274,11 +275,82 @@ export default function OnboardingPage() {
                 </p>
               </div>
 
+              {/* Billing Interval Toggle */}
+              <div className="flex justify-center my-4">
+                <div className="inline-flex p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl border border-slate-300/40 shadow-inner relative gap-1">
+                  <button
+                    onClick={() => setSelectedInterval('month')}
+                    className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 relative z-10 ${
+                      selectedInterval === 'month'
+                        ? 'bg-slate-900 text-white shadow-md'
+                        : 'text-slate-500 hover:text-slate-950'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setSelectedInterval('quarter')}
+                    className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 relative z-10 ${
+                      selectedInterval === 'quarter'
+                        ? 'bg-slate-900 text-white shadow-md'
+                        : 'text-slate-500 hover:text-slate-950'
+                    }`}
+                  >
+                    Quarterly
+                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[7px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm">
+                      Save 20%
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedInterval('year')}
+                    className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 relative z-10 ${
+                      selectedInterval === 'year'
+                        ? 'bg-slate-900 text-white shadow-md'
+                        : 'text-slate-500 hover:text-slate-950'
+                    }`}
+                  >
+                    Yearly
+                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[7px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm">
+                      Save 33%
+                    </span>
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 gap-4">
                 {[
-                  { id: 'SEEKER', name: 'Seeker', price: 'Free', desc: 'Core job search tools', perks: ['1 Optimization/mo', '3 Daily Scans'] },
-                  { id: 'ELITE', name: 'Elite', price: '$15', desc: 'Accelerated placement', perks: ['100 Optimizations/mo', 'Intel Briefs', 'Negotiation Playbooks'] },
-                  { id: 'PROFESSIONAL', name: 'Professional', price: '$29', desc: 'White-glove career hunt', perks: ['Unlimited Everything', 'Priority Support', 'Strategy Call'] }
+                  { 
+                    id: 'SEEKER', 
+                    name: 'Seeker', 
+                    price: 'Free', 
+                    desc: 'Core job search tools', 
+                    subtext: '', 
+                    perks: ['1 Optimization/mo', '3 Daily Scans'] 
+                  },
+                  { 
+                    id: 'ELITE', 
+                    name: 'Elite', 
+                    price: selectedInterval === 'month' ? '$15' : selectedInterval === 'quarter' ? '$36' : '$119', 
+                    desc: 'Accelerated placement', 
+                    subtext: selectedInterval === 'month' ? 'per month' : selectedInterval === 'quarter' ? 'effectively $12/mo' : 'effectively $9.90/mo', 
+                    perks: selectedInterval === 'month' 
+                      ? ['100 Optimizations/mo', 'Intel Briefs', 'Negotiation Playbooks'] 
+                      : selectedInterval === 'quarter' 
+                        ? ['Save $9', 'Intel Briefs', 'Negotiation Playbooks'] 
+                        : ['Save $61', 'Intel Briefs', 'Negotiation Playbooks']
+                  },
+                  { 
+                    id: 'PROFESSIONAL', 
+                    name: 'Professional', 
+                    price: selectedInterval === 'month' ? '$29' : selectedInterval === 'quarter' ? '$69' : '$229', 
+                    desc: 'White-glove career hunt', 
+                    subtext: selectedInterval === 'month' ? 'per month' : selectedInterval === 'quarter' ? 'effectively $23/mo' : 'effectively $19.08/mo', 
+                    perks: selectedInterval === 'month' 
+                      ? ['Unlimited Everything', 'Priority Support', 'Strategy Call'] 
+                      : selectedInterval === 'quarter' 
+                        ? ['Save $18', 'Priority Support', 'Strategy Call'] 
+                        : ['Save $119', 'Priority Support', 'Strategy Call']
+                  }
                 ].map((plan) => (
 
                   <button
@@ -294,10 +366,15 @@ export default function OnboardingPage() {
                       <div>
                         <h3 className="text-xl font-black text-slate-900">{plan.name}</h3>
                         <p className="text-sm font-medium text-slate-400">{plan.desc}</p>
+                        {plan.subtext && <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider mt-1">{plan.subtext}</p>}
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-black text-slate-900">{plan.price}</div>
-                        {plan.price !== 'Free' && <div className="text-[10px] font-bold text-slate-400 uppercase">per month</div>}
+                        {plan.price !== 'Free' && (
+                          <div className="text-[10px] font-bold text-slate-400 uppercase">
+                            {selectedInterval === 'month' ? 'per month' : selectedInterval === 'quarter' ? 'every 3 mos' : 'every 12 mos'}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
