@@ -15,6 +15,9 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// FEATURE FLAGS (v2.0)
+const SHOW_RESUME_ANALYZER = false;
+
 export function DashboardLayoutClient({ children, user }: { children: React.ReactNode, user?: { name?: string | null, email?: string | null, tier?: string } }) {
 
   const pathname = usePathname();
@@ -52,6 +55,7 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
     { name: "Intelligence", href: "/dashboard/intelligence", icon: Activity },
     { name: "Applications", href: "/dashboard/applications", icon: Briefcase },
     { name: "Interviews", href: "/dashboard/interviews", icon: MessageSquare },
+    ...(SHOW_RESUME_ANALYZER ? [{ name: "Analyzer", href: "/dashboard/analyzer", icon: Sparkles }] : []),
     { name: "Profile", href: "/dashboard/profile", icon: Settings },
   ];
 
